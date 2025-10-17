@@ -13,7 +13,8 @@ from matplotlib.figure import Figure
 class KnapsackGAApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("🧬 Genetic Algorithm – 0/1 Knapsack Problem")
+        self.title("Genetic Algorithm – 0/1 Knapsack Problem")
+        self.iconbitmap(False, 'assets/icon_fun.ico')
         self.geometry("1200x700")
 
         self.create_widgets()
