@@ -20,15 +20,12 @@ class KnapsackGAApp(tk.Tk):
         self.create_widgets()
 
     def create_widgets(self):
-        # Left panel: parameters
         left_frame = ttk.Frame(self, padding=10)
         left_frame.pack(side=tk.LEFT, fill=tk.Y)
 
-        # Right panel: plots
         self.plot_frame = ttk.Frame(self, padding=10)
         self.plot_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
-        # --- Dataset Generation ---
         ttk.Label(left_frame, text="Dataset Parameters", font=("Segoe UI", 12, "bold")).pack(anchor="w", pady=(0,5))
 
         self.entry_items = self._add_labeled_entry(left_frame, "Items (n_items):", 60)
@@ -40,7 +37,6 @@ class KnapsackGAApp(tk.Tk):
 
         ttk.Separator(left_frame, orient="horizontal").pack(fill="x", pady=10)
 
-        # --- GA Hyperparameters ---
         ttk.Label(left_frame, text="Genetic Algorithm", font=("Segoe UI", 12, "bold")).pack(anchor="w", pady=(0,5))
 
         self.entry_pop = self._add_labeled_entry(left_frame, "Population size:", 80)
@@ -69,7 +65,6 @@ class KnapsackGAApp(tk.Tk):
 
     def run_ga(self):
         try:
-            # Read dataset parameters
             n_items = int(self.entry_items.get())
             capacity_ratio = float(self.entry_capacity.get())
             n_heavy = int(self.entry_heavy.get())
@@ -88,7 +83,6 @@ class KnapsackGAApp(tk.Tk):
 
             problem = KnapsackProblem(values, weights, capacity)
 
-            # GA parameters
             pop_size = int(self.entry_pop.get())
             generations = int(self.entry_gen.get())
             cross = float(self.entry_cross.get())
