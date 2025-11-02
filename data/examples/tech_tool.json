@@ -1,0 +1,16 @@
+[
+  {"name": "Xiaomi Curved Gaming Monitor G34WQi", "value": 949, "weight": 6.9},
+  {"name": "SMX Snowy Blackout 240 Cooling (2x120mm)", "value": 179, "weight": 1.95},
+  {"name": "ASUS B650E Max Gaming WiFi Motherboard", "value": 639, "weight": 2.4},
+  {"name": "ASUS RT-AX52 Router", "value": 159, "weight": 0.298},
+  {"name": "Xiaomi Smart Band 10", "value": 199, "weight": 0.016},
+  {"name": "Epson EcoTank L3270 Printer", "value": 799, "weight": 3.9},
+  {"name": "HyperX Cloud III Headphones", "value": 258, "weight": 0.32},
+  {"name": "Green Cell Cube 12V 40Ah Battery", "value": 339, "weight": 12.0},
+  {"name": "Electric Actuator LA50 1500N 30cm", "value": 987, "weight": 6.3},
+  {"name": "JetRacer AI 4-Wheel Robot (Jetson Nano)", "value": 949, "weight": 2.541},
+  {"name": "Quick TS1100 Soldering Station 90W", "value": 719, "weight": 2.8},
+  {"name": "Lidar Lite v3 Distance Sensor (40m)", "value": 719, "weight": 0.357},
+  {"name": "Fiberlogy Easy PLA 1.75mm Filament (2.5kg)", "value": 234, "weight": 3.6},
+  {"name": "Rebel RB-1002 Impact Drill 20V", "value": 233, "weight": 2.9}
+]
