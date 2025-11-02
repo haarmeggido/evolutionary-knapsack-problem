@@ -13,5 +13,5 @@ class KnapsackProblem:
         total_weight = np.sum(individual * self.weights)
         if total_weight <= self.capacity:
             return total_value
-        penalty = 100 * (total_weight - self.capacity)
+        penalty = 10000 * (total_weight - self.capacity)
         return total_value - penalty

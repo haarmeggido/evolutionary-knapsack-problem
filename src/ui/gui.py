@@ -197,12 +197,22 @@ class KnapsackGAApp(tk.Tk):
 
         selected = ga.best_individual.astype(bool)
         v, w = ga.problem.values, ga.problem.weights
+        names = getattr(ga.problem, "names", None)
+
         ax2.scatter(w, v, c="gray", label="Unselected")
         ax2.scatter(w[selected], v[selected], c="green", label="Selected")
+
+        # Add labels if names are available
+        if names is not None:
+            for i, name in enumerate(names):
+                color = "green" if selected[i] else "gray"
+                ax2.text(w[i] + 0.1, v[i] + 0.1, name, fontsize=8, color=color, alpha=0.8)
+
         ax2.set_title(f"Selected Items\nV={ga.best_value:.1f}, W={ga.best_weight:.1f}")
         ax2.set_xlabel("Weight")
         ax2.set_ylabel("Value")
         ax2.legend()
         ax2.grid(True)
+
 
         embed_plot(self.plot_frame, fig)
