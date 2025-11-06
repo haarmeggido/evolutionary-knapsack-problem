@@ -11,7 +11,8 @@ class KnapsackProblem:
     def fitness(self, individual):
         total_value = np.sum(individual * self.values)
         total_weight = np.sum(individual * self.weights)
+        penalty_factor = total_value / total_weight * 10 if total_weight > 0 else 0
         if total_weight <= self.capacity:
             return total_value
-        penalty = 10000 * (total_weight - self.capacity)
+        penalty = penalty_factor * (total_weight - self.capacity)
         return total_value - penalty

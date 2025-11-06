@@ -13,15 +13,16 @@ import os
 class KnapsackGAApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("🧬 Genetic Algorithm – 0/1 Knapsack Problem")
+        self.title("Genetic Algorithm – 0/1 Knapsack Problem")
         self.geometry("1200x700")
+        self.iconbitmap(default="assets/icon_fun.ico")
 
         self.dataset_path = os.path.join("data", "examples")
         self.problem = None
 
         self.create_menu()
         self.create_widgets()
-
+        self.results_button = None
     # -----------------------------
     # Menu Bar
     # -----------------------------
@@ -33,11 +34,11 @@ class KnapsackGAApp(tk.Tk):
         file_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="File", menu=file_menu)
 
-        file_menu.add_command(label="🧮 New Generated Problem", command=self.show_generated_problem)
+        file_menu.add_command(label="New Generated Problem", command=self.show_generated_problem)
         file_menu.add_separator()
 
         example_menu = tk.Menu(file_menu, tearoff=0)
-        file_menu.add_cascade(label="📦 Load Example", menu=example_menu)
+        file_menu.add_cascade(label="Load Example", menu=example_menu)
         example_menu.add_command(label="Groceries", command=lambda: self.load_example("groceries.json"))
         example_menu.add_command(label="Household", command=lambda: self.load_example("household.json"))
         example_menu.add_command(label="Magic Items", command=lambda: self.load_example("magic_items.json"))
@@ -71,18 +72,27 @@ class KnapsackGAApp(tk.Tk):
 
         self._build_parameter_panel()
 
-    def _build_parameter_panel(self):
+    # -----------------------------
+    # Parameter Panel
+    # -----------------------------
+    def _build_parameter_panel(self, mode="generated"):
         lf = self.left_frame
         for widget in lf.winfo_children():
             widget.destroy()
 
         ttk.Label(lf, text="Dataset Parameters", font=("Segoe UI", 12, "bold")).pack(anchor="w", pady=(0, 5))
-        self.entry_items = self._add_labeled_entry(lf, "Items (n_items):", 60)
-        self.entry_capacity = self._add_labeled_entry(lf, "Capacity ratio:", 0.3)
-        self.entry_heavy = self._add_labeled_entry(lf, "Heavy items:", 10)
-        self.entry_efficient = self._add_labeled_entry(lf, "Efficient items:", 10)
-        self.entry_deceptive = self._add_labeled_entry(lf, "Deceptive items:", 10)
-        self.entry_seed = self._add_labeled_entry(lf, "Seed:", 42)
+
+        self.problem_mode = mode  # "generated" or "loaded"
+
+        if mode == "generated":
+            self.entry_items = self._add_labeled_entry(lf, "Items (n_items):", 60)
+            self.entry_capacity = self._add_labeled_entry(lf, "Capacity ratio:", 0.3)
+            self.entry_heavy = self._add_labeled_entry(lf, "Heavy items:", 10)
+            self.entry_efficient = self._add_labeled_entry(lf, "Efficient items:", 10)
+            self.entry_deceptive = self._add_labeled_entry(lf, "Deceptive items:", 10)
+            self.entry_seed = self._add_labeled_entry(lf, "Seed:", 42)
+        else:
+            self.entry_capacity = self._add_labeled_entry(lf, "Capacity ratio:", 0.4)
 
         ttk.Separator(lf, orient="horizontal").pack(fill="x", pady=10)
 
@@ -94,10 +104,119 @@ class KnapsackGAApp(tk.Tk):
         self.entry_tour = self._add_labeled_entry(lf, "Tournament size:", 3)
 
         ttk.Separator(lf, orient="horizontal").pack(fill="x", pady=10)
-
-        ttk.Button(lf, text="🚀 Run Genetic Algorithm", command=self.run_ga).pack(fill="x", pady=5)
+        ttk.Button(lf, text="Run Genetic Algorithm", command=self.run_ga).pack(fill="x", pady=5)
         self.info_label = ttk.Label(lf, text="", wraplength=250, justify="left")
         self.info_label.pack(fill="x", pady=5)
+
+        # -----------------------------
+    # Results Window
+    # -----------------------------
+    def show_results_window(self, ga):
+        """Open a sub-window listing the items of the final GA solution."""
+        result_win = tk.Toplevel(self)
+        result_win.title("Solution Details")
+        result_win.geometry("600x500")
+        result_win.transient(self)
+        result_win.grab_set()
+
+        ttk.Label(result_win, text="Knapsack Solution Details", font=("Segoe UI", 12, "bold")).pack(pady=10)
+
+        # Create table frame
+        table_frame = ttk.Frame(result_win)
+        table_frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+        columns = ("#", "Name/ID", "Weight", "Value", "Taken")
+        tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=15)
+
+        for col in columns:
+            tree.heading(col, text=col)
+            tree.column(col, anchor="center", width=100)
+
+        tree.pack(fill="both", expand=True, side="left")
+        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+        scrollbar.pack(side="right", fill="y")
+        tree.configure(yscroll=scrollbar.set)
+
+        selected = ga.best_individual.astype(bool)
+        values, weights = ga.problem.values, ga.problem.weights
+        names = getattr(ga.problem, "names", None)
+
+        for i in range(ga.problem.n_items):
+            item_name = names[i] if names is not None else f"Item {i+1}"
+            taken_status = "✓" if selected[i] else "✗"
+            color_tag = "selected" if selected[i] else "unselected"
+            tree.insert("", "end", values=(i+1, item_name, weights[i], values[i], taken_status), tags=(color_tag,))
+
+        tree.tag_configure("selected", background="#d1f5d3")
+        tree.tag_configure("unselected", background="#f0f0f0")
+
+        # Summary label
+        ttk.Label(
+            result_win,
+            text=(
+                f"Total Value: {ga.best_value:.2f}    "
+                f"Total Weight: {ga.best_weight:.2f} / {ga.problem.capacity:.2f}"
+            ),
+            font=("Segoe UI", 10, "bold")
+        ).pack(pady=10)
+
+    # -----------------------------
+    # Menu Actions
+    # -----------------------------
+    def show_generated_problem(self):
+        """Switch to 'Generated Problem' mode."""
+        self.problem = None
+        self._build_parameter_panel(mode="generated")
+        for widget in self.plot_frame.winfo_children():
+            widget.destroy()
+        self.info_label.config(text="Ready to generate a new random problem.")
+
+
+    def load_example(self, filename):
+        """Switch to 'Loaded Example' mode."""
+        try:
+            filepath = os.path.join(self.dataset_path, filename)
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            values = [item["value"] for item in data]
+            weights = [item["weight"] for item in data]
+            names = [item["name"] for item in data]
+
+            # only capacity ratio shown, rest locked
+            self.loaded_data = (values, weights, names)
+            self._build_parameter_panel(mode="loaded")
+
+            cap_ratio = float(self.entry_capacity.get())
+            capacity = sum(weights) * cap_ratio
+            self.problem = KnapsackProblem(values, weights, capacity, names)
+
+            self.info_label.config(
+                text=f"Loaded dataset: {filename}\nItems: {len(values)}, Capacity: {capacity:.2f}"
+            )
+            for widget in self.plot_frame.winfo_children():
+                widget.destroy()
+
+        except Exception as e:
+            messagebox.showerror("Error loading file", str(e))
+
+
+    # -----------------------------
+    # Helper: Generate problem dynamically
+    # -----------------------------
+    def _generate_problem(self):
+        n_items = int(self.entry_items.get())
+        cap_ratio = float(self.entry_capacity.get())
+        n_heavy = int(self.entry_heavy.get())
+        n_eff = int(self.entry_efficient.get())
+        n_dec = int(self.entry_deceptive.get())
+        seed = int(self.entry_seed.get())
+
+        values, weights, capacity, _ = generate_knapsack_dataset(
+            n_items=n_items, capacity_ratio=cap_ratio,
+            n_heavy=n_heavy, n_efficient=n_eff, n_deceptive=n_dec, seed=seed
+        )
+        return KnapsackProblem(values, weights, capacity)
 
     def _add_labeled_entry(self, parent, label, default):
         frame = ttk.Frame(parent)
@@ -107,56 +226,20 @@ class KnapsackGAApp(tk.Tk):
         ttk.Entry(frame, textvariable=var, width=10).pack(side=tk.RIGHT)
         return var
 
-    # -----------------------------
-    # Menu Actions
-    # -----------------------------
-    def show_generated_problem(self):
-        """Reset UI for a generated dataset."""
-        self.problem = None
-        self._build_parameter_panel()
-        for widget in self.plot_frame.winfo_children():
-            widget.destroy()
-        self.info_label.config(text="🧮 Ready to generate a new random problem.")
-
-    def load_example(self, filename):
-        try:
-            filepath = os.path.join(self.dataset_path, filename)
-            with open(filepath, "r", encoding="utf-8") as f:
-                data = json.load(f)
-
-            values = [item["value"] for item in data]
-            weights = [item["weight"] for item in data]
-            names = [item["name"] for item in data]
-            capacity = sum(weights) * 0.4  # adjustable default
-
-            self.problem = KnapsackProblem(values, weights, capacity, names)
-            self.info_label.config(text=f"📦 Loaded dataset: {filename}\nItems: {len(values)}, Capacity: {capacity:.2f}")
-
-            for widget in self.plot_frame.winfo_children():
-                widget.destroy()
-
-        except Exception as e:
-            messagebox.showerror("Error loading file", str(e))
 
     # -----------------------------
     # Run GA
     # -----------------------------
     def run_ga(self):
         try:
-            if self.problem is None:
-                # Generate a problem dynamically
-                n_items = int(self.entry_items.get())
+            # Generate or update problem based on mode
+            if self.problem_mode == "generated":
+                self.problem = self._generate_problem()
+            elif self.problem_mode == "loaded" and hasattr(self, "loaded_data"):
+                values, weights, names = self.loaded_data
                 cap_ratio = float(self.entry_capacity.get())
-                n_heavy = int(self.entry_heavy.get())
-                n_eff = int(self.entry_efficient.get())
-                n_dec = int(self.entry_deceptive.get())
-                seed = int(self.entry_seed.get())
-
-                values, weights, capacity, _ = generate_knapsack_dataset(
-                    n_items=n_items, capacity_ratio=cap_ratio,
-                    n_heavy=n_heavy, n_efficient=n_eff, n_deceptive=n_dec, seed=seed
-                )
-                self.problem = KnapsackProblem(values, weights, capacity)
+                capacity = sum(weights) * cap_ratio
+                self.problem = KnapsackProblem(values, weights, capacity, names)
 
             # GA parameters
             pop_size = int(self.entry_pop.get())
@@ -172,9 +255,19 @@ class KnapsackGAApp(tk.Tk):
             )
 
             best_ind, best_val, best_wt = ga.train(verbose=False)
-            self.info_label.config(text=f"✅ Best Value: {best_val:.2f}\n⚖️ Weight: {best_wt:.2f} / {self.problem.capacity:.2f}")
+            self.info_label.config(text=f"Best Value: {best_val:.2f}\nWeight: {best_wt:.2f} / {self.problem.capacity:.2f}")
 
             self._plot_results(ga)
+
+            if self.results_button:
+                self.results_button.destroy()
+
+            self.results_button = ttk.Button(
+                self.left_frame,
+                text="Show Results Window",
+                command=lambda: self.show_results_window(ga)
+            )
+            self.results_button.pack(fill="x", pady=5)
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
