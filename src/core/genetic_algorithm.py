@@ -1,80 +1,123 @@
-import numpy as np
 import random
+import numpy as np
+from deap import base, creator, tools, algorithms
 import matplotlib.pyplot as plt
 
+
 class GeneticAlgorithm:
-    def __init__(self, problem, pop_size=50, generations=150,
-                 crossover_rate=0.8, mutation_rate=0.05,
-                 tournament_size=3, elitism=True, seed=None):
+    def __init__(
+        self,
+        problem,
+        pop_size=50,
+        generations=150,
+        crossover_rate=0.8,
+        mutation_rate=0.05,
+        tournament_size=3,
+        elitism=True,
+        seed=None
+    ):
         self.problem = problem
         self.pop_size = pop_size
         self.generations = generations
-        self.crossover_rate = crossover_rate
-        self.mutation_rate = mutation_rate
+        self.cxpb = crossover_rate
+        self.mutpb = mutation_rate
         self.tournament_size = tournament_size
         self.elitism = elitism
         self.history = {"best": [], "avg": []}
+
         if seed is not None:
-            np.random.seed(seed)
             random.seed(seed)
+            np.random.seed(seed)
 
-    def initialize_population(self):
-        return np.random.randint(2, size=(self.pop_size, self.problem.n_items))
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+        creator.create("Individual", list, fitness=creator.FitnessMax)
 
-    def tournament_selection(self, pop, fitnesses):
-        selected = []
-        for _ in range(self.pop_size):
-            idx = np.random.choice(range(self.pop_size), self.tournament_size, replace=False)
-            winner = pop[idx[np.argmax(fitnesses[idx])]]
-            selected.append(winner)
-        return np.array(selected)
+        self.toolbox = base.Toolbox()
 
-    def crossover(self, parent1, parent2):
-        if random.random() < self.crossover_rate:
-            point = random.randint(1, self.problem.n_items - 1)
-            c1 = np.concatenate((parent1[:point], parent2[point:]))
-            c2 = np.concatenate((parent2[:point], parent1[point:]))
-            return c1, c2
-        return parent1.copy(), parent2.copy()
+        # Individual is a binary list
+        self.toolbox.register(
+            "attr_bool",
+            lambda: random.randint(0, 1)
+        )
 
-    def mutate(self, individual):
-        for i in range(self.problem.n_items):
-            if random.random() < self.mutation_rate:
-                individual[i] = 1 - individual[i]
-        return individual
+        self.toolbox.register(
+            "individual",
+            tools.initRepeat,
+            creator.Individual,
+            self.toolbox.attr_bool,
+            n=self.problem.n_items
+        )
 
-    def evolve(self, pop):
-        fitnesses = np.array([self.problem.fitness(ind) for ind in pop])
-        next_pop = []
+        self.toolbox.register(
+            "population",
+            tools.initRepeat,
+            list,
+            self.toolbox.individual
+        )
 
-        if self.elitism:
-            elite = pop[np.argmax(fitnesses)].copy()
-            next_pop.append(elite)
+        def eval_knapsack(individual):
+            return (self.problem.fitness(np.array(individual)),)
 
-        selected = self.tournament_selection(pop, fitnesses)
-        for i in range(0, self.pop_size - len(next_pop), 2):
-            p1, p2 = selected[i], selected[i + 1]
-            c1, c2 = self.crossover(p1, p2)
-            next_pop.extend([self.mutate(c1), self.mutate(c2)])
+        self.toolbox.register("evaluate", eval_knapsack)
+        self.toolbox.register("select", tools.selTournament, tournsize=self.tournament_size)
+        self.toolbox.register("mate", tools.cxOnePoint)
+        self.toolbox.register("mutate", tools.mutFlipBit, indpb=self.mutpb)
 
-        return np.array(next_pop[:self.pop_size]), fitnesses
 
     def train(self, verbose=True):
-        pop = self.initialize_population()
+        pop = self.toolbox.population(n=self.pop_size)
+
+        # Evaluate initial population
+        fitnesses = list(map(self.toolbox.evaluate, pop))
+        for ind, fit in zip(pop, fitnesses):
+            ind.fitness.values = fit
+
         for gen in range(self.generations):
-            pop, fitnesses = self.evolve(pop)
-            best, avg = np.max(fitnesses), np.mean(fitnesses)
+            offspring = self.toolbox.select(pop, len(pop))
+            offspring = list(map(self.toolbox.clone, offspring))
+
+            # Crossover
+            for c1, c2 in zip(offspring[::2], offspring[1::2]):
+                if random.random() < self.cxpb:
+                    self.toolbox.mate(c1, c2)
+                    del c1.fitness.values
+                    del c2.fitness.values
+
+            # Mutation
+            for mutant in offspring:
+                if random.random() < self.mutpb:
+                    self.toolbox.mutate(mutant)
+                    del mutant.fitness.values
+
+            # Evaluate dirty individuals
+            invalid = [ind for ind in offspring if not ind.fitness.valid]
+            for ind in invalid:
+                ind.fitness.values = self.toolbox.evaluate(ind)
+
+            # Elitism
+            if self.elitism:
+                elite = tools.selBest(pop, 1)[0]
+                offspring[0] = self.toolbox.clone(elite)
+
+            pop = offspring
+
+            # Track stats
+            fits = [ind.fitness.values[0] for ind in pop]
+            best = max(fits)
+            avg = np.mean(fits)
             self.history["best"].append(best)
             self.history["avg"].append(avg)
+
             if verbose and gen % 10 == 0:
                 print(f"Gen {gen:03d} | Best: {best:.2f} | Avg: {avg:.2f}")
 
-        final_fit = np.array([self.problem.fitness(ind) for ind in pop])
-        best_idx = np.argmax(final_fit)
-        self.best_individual = pop[best_idx]
+        # Final evaluation
+        best_ind = tools.selBest(pop, 1)[0]
+        self.best_individual = np.array(best_ind)
         self.best_value = np.sum(self.best_individual * self.problem.values)
         self.best_weight = np.sum(self.best_individual * self.problem.weights)
         return self.best_individual, self.best_value, self.best_weight
+
 
     def plot_fitness(self, ax=None):
         if ax is None:
@@ -82,7 +125,7 @@ class GeneticAlgorithm:
             ax = plt.gca()
         ax.plot(self.history["best"], label="Best Fitness")
         ax.plot(self.history["avg"], label="Average Fitness", linestyle="--")
-        ax.set_title("GA – Fitness Evolution")
+        ax.set_title("GA – Fitness Evolution (DEAP)")
         ax.set_xlabel("Generation")
         ax.set_ylabel("Fitness")
         ax.legend()
