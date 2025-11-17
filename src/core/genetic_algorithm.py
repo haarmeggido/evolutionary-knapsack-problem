@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from deap import base, creator, tools, algorithms
+from deap import base, creator, tools
 import matplotlib.pyplot as plt
 
 
