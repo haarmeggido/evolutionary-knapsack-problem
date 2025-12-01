@@ -158,7 +158,7 @@ fitness = total_value - penalty * (total_weight - capacity)  # if overweight
 fitness = total_value  # if within capacity
 ```
 
-The penalty ensures solutions evolving toward feasible (within capacity) solutions while maximizing value.
+The penalty ensures solutions evolve toward feasible (within capacity) solutions while maximizing value.
 
 ## 📁 Project Structure
 
