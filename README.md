@@ -2,7 +2,7 @@
 
 A Python implementation of a Genetic Algorithm (GA) to solve the 0/1 Knapsack Problem using the DEAP (Distributed Evolutionary Algorithms in Python) framework. The project includes an interactive GUI application and a Jupyter notebook for experimentation.
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
@@ -16,11 +16,11 @@ A Python implementation of a Genetic Algorithm (GA) to solve the 0/1 Knapsack Pr
 - [Project Structure](#project-structure)
 - [License](#license)
 
-## 🎯 Overview
+## Overview
 
 The **0/1 Knapsack Problem** is a classic optimization problem where you need to select items with given weights and values to maximize total value while staying within a weight capacity constraint. This project uses evolutionary algorithms to find near-optimal solutions.
 
-## ✨ Features
+## Features
 
 - **Interactive GUI Application** - User-friendly Tkinter interface for configuring and running genetic algorithms
 - **Custom Dataset Generator** - Generate knapsack problems with:
@@ -43,7 +43,7 @@ The **0/1 Knapsack Problem** is a classic optimization problem where you need to
 - **Detailed Results View** - Tabular display of selected items with weights and values
 - **Jupyter Notebook** - For research and experimentation
 
-## 🚀 Installation
+## Installation
 
 ### Prerequisites
 
@@ -63,7 +63,7 @@ cd evolutionary-knapsack-problem
 pip install -r requirements.txt
 ```
 
-## 💻 Usage
+## Usage
 
 ### GUI Application
 
@@ -85,7 +85,7 @@ python src/main.py
 
 3. **Run the Algorithm:**
    - Click "Run Genetic Algorithm"
-   - Watch the fitness evolution plot update in real-time
+   - Watch the fitness evolution plot the graph of found solution
 
 4. **View Results:**
    - Check the solution summary in the left panel
@@ -101,7 +101,7 @@ jupyter notebook src/Evolutionary_Algorithms_Knapsack_problem.ipynb
 
 The notebook provides step-by-step examples and allows you to customize the algorithm further.
 
-## 📦 Example Datasets
+## Example Datasets
 
 The project includes four JSON-based example datasets in `data/examples/`:
 
@@ -158,7 +158,7 @@ fitness = total_value - penalty * (total_weight - capacity)  # if overweight
 fitness = total_value  # if within capacity
 ```
 
-The penalty ensures solutions evolve toward feasible (within capacity) solutions while maximizing value.
+The penalty ensures solutions evolve toward feasible (within capacity) solutions while maximizing value. Penalty is updated dynamically to fit the crrent problem, as the average ratio of weight to the cost
 
 ## 📁 Project Structure
 
@@ -190,7 +190,7 @@ evolutionary-knapsack-problem/
 └── README.md                         # This file
 ```
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
