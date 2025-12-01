@@ -115,7 +115,7 @@ Each dataset includes:
 - Weights (in kg or appropriate units)
 - Values (price or utility score)
 
-## ⚙️ Configuration
+## Configuration
 
 ### Dataset Generation Parameters
 
@@ -139,7 +139,7 @@ Each dataset includes:
 | `tournament_size` | 3 | Number of individuals in tournament selection |
 | `elitism` | True | Keep best individual from previous generation |
 
-## 🧬 How It Works
+## How It Works
 
 ### Genetic Algorithm Overview
 
@@ -160,7 +160,7 @@ fitness = total_value  # if within capacity
 
 The penalty ensures solutions evolve toward feasible (within capacity) solutions while maximizing value. Penalty is updated dynamically to fit the crrent problem, as the average ratio of weight to the cost
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 evolutionary-knapsack-problem/
