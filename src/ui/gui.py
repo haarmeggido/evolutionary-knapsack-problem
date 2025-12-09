@@ -23,6 +23,7 @@ class KnapsackGAApp(tk.Tk):
         self.create_menu()
         self.create_widgets()
         self.results_button = None
+        self.init_method = "efficient"  # default initialization method
     # -----------------------------
     # Menu Bar
     # -----------------------------
@@ -102,6 +103,10 @@ class KnapsackGAApp(tk.Tk):
         self.entry_cross = self._add_labeled_entry(lf, "Crossover rate:", 0.8)
         self.entry_mut = self._add_labeled_entry(lf, "Mutation rate:", 0.05)
         self.entry_tour = self._add_labeled_entry(lf, "Tournament size:", 3)
+        self.init_method_var = tk.StringVar(value="efficient")
+        ttk.Label(lf, text="Initialization Method:").pack(anchor="w", pady=(10, 0))
+        ttk.Radiobutton(lf, text="Random", variable=self.init_method_var, value="random").pack(anchor="w")
+        ttk.Radiobutton(lf, text="Efficient", variable=self.init_method_var, value="efficient").pack(anchor="w")
 
         ttk.Separator(lf, orient="horizontal").pack(fill="x", pady=10)
         ttk.Button(lf, text="Run Genetic Algorithm", command=self.run_ga).pack(fill="x", pady=5)
@@ -251,7 +256,7 @@ class KnapsackGAApp(tk.Tk):
             ga = GeneticAlgorithm(
                 self.problem, pop_size, generations,
                 crossover_rate=cross, mutation_rate=mut,
-                tournament_size=tour, elitism=True
+                tournament_size=tour, elitism=True, init_method=self.init_method
             )
 
             best_ind, best_val, best_wt = ga.train(verbose=False)

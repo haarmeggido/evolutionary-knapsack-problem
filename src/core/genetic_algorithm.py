@@ -14,7 +14,8 @@ class GeneticAlgorithm:
         mutation_rate=0.05,
         tournament_size=3,
         elitism=True,
-        seed=None
+        seed=None,
+        init_method="random",   
     ):
         self.problem = problem
         self.pop_size = pop_size
@@ -24,6 +25,7 @@ class GeneticAlgorithm:
         self.tournament_size = tournament_size
         self.elitism = elitism
         self.history = {"best": [], "avg": []}
+        self.init_method = init_method
 
         if seed is not None:
             random.seed(seed)
@@ -35,26 +37,37 @@ class GeneticAlgorithm:
         self.toolbox = base.Toolbox()
 
         # Individual is a binary list
-        self.toolbox.register(
-            "attr_bool",
-            lambda: random.randint(0, 1)
-        )
+        self.toolbox.register("attr_bool", lambda: random.randint(0, 1))
 
+        # Standard random individual
         self.toolbox.register(
-            "individual",
+            "individual_random",
             tools.initRepeat,
             creator.Individual,
             self.toolbox.attr_bool,
             n=self.problem.n_items
         )
 
+        # Efficient-biased individual
+        def efficient_attr():
+            ratios = self.problem.values / np.maximum(self.problem.weights, 1)
+            # Normalize into probabilities
+            probs = (ratios - ratios.min()) / (ratios.max() - ratios.min() + 1e-9)
+            probs = 0.2 + 0.8 * probs   # smooth floor probability
+            return [1 if random.random() < p else 0 for p in probs]
+
+        def individual_efficient():
+            return creator.Individual(efficient_attr())
+
+        self.toolbox.register("individual_efficient", individual_efficient)
+
+        # Population constructor will switch dynamically
         self.toolbox.register(
             "population",
-            tools.initRepeat,
-            list,
-            self.toolbox.individual
+            self._init_population
         )
 
+        # Evaluation
         def eval_knapsack(individual):
             return (self.problem.fitness(np.array(individual)),)
 
@@ -63,7 +76,13 @@ class GeneticAlgorithm:
         self.toolbox.register("mate", tools.cxOnePoint)
         self.toolbox.register("mutate", tools.mutFlipBit, indpb=self.mutpb)
 
+    def _init_population(self, n):
+        if self.init_method == "efficient":
+            return [self.toolbox.individual_efficient() for _ in range(n)]
+        else:
+            return [self.toolbox.individual_random() for _ in range(n)]
 
+    # TRAIN LOOP
     def train(self, verbose=True):
         pop = self.toolbox.population(n=self.pop_size)
 
