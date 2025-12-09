@@ -32,7 +32,7 @@ The **0/1 Knapsack Problem** is a classic optimization problem where you need to
   - Household items
   - Magic items (fantasy theme)
   - Tech tools
-- **Real-time Visualization** - Live fitness evolution plots during algorithm execution
+- **Result Visualization** - Fitness evolution plots after algorithm execution
 - **Configurable GA Parameters**:
   - Population size
   - Number of generations
@@ -40,6 +40,7 @@ The **0/1 Knapsack Problem** is a classic optimization problem where you need to
   - Mutation rate
   - Tournament selection size
   - Elitism option
+  - Initial population sampling method
 - **Detailed Results View** - Tabular display of selected items with weights and values
 - **Jupyter Notebook** - For research and experimentation
 
@@ -101,8 +102,6 @@ jupyter notebook src/Evolutionary_Algorithms_Knapsack_problem.ipynb
 
 The notebook provides step-by-step examples and allows you to customize the algorithm further.
 
-Here is a clean replacement section for your **README.md**, rewritten as a summary table:
-
 
 ## Example Datasets
 
@@ -141,6 +140,7 @@ Each dataset contains item names, weights, and values, suitable for testing the 
 | `mutation_rate` | 0.05 | Probability of bit flip mutation |
 | `tournament_size` | 3 | Number of individuals in tournament selection |
 | `elitism` | True | Keep best individual from previous generation |
+| `init_method` | random | Method of initializing the population |
 
 ## How It Works
 
