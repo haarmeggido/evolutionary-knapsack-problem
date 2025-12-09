@@ -168,9 +168,8 @@ The penalty ensures solutions evolve toward feasible (within capacity) solutions
 ```
 evolutionary-knapsack-problem/
 ├── assets/                           # Application icons
-│   ├── icon_boring.ico
-│   ├── icon_fun.ico
 │   └── icon_gene.ico
+│   └── ...
 ├── data/
 │   └── examples/                     # Pre-loaded example datasets
 │       ├── groceries.json
