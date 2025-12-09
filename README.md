@@ -101,19 +101,22 @@ jupyter notebook src/Evolutionary_Algorithms_Knapsack_problem.ipynb
 
 The notebook provides step-by-step examples and allows you to customize the algorithm further.
 
+Here is a clean replacement section for your **README.md**, rewritten as a summary table:
+
+
 ## Example Datasets
 
-The project includes four JSON-based example datasets in `data/examples/`:
+The project includes several curated JSON datasets located in `data/examples/`.
+Each dataset contains item names, weights, and values, suitable for testing the Genetic Algorithm under different themes.
 
-1. **groceries.json** - 30 grocery items with realistic weights and prices
-2. **household.json** - Common household items
-3. **magic_items.json** - Fantasy RPG-themed magical items
-4. **tech_tools.json** - Technology and gadget items
+### Dataset Summary (evaluated at default **0.4 capacity ratio**)
 
-Each dataset includes:
-- Item names
-- Weights (in kg or appropriate units)
-- Values (price or utility score)
+| Dataset         | Optimal Value | Optimal Weight | # Items |
+| --------------- | ------------- | -------------- | ------- |
+| **Groceries**   | 283           | 9.70           | 30      |
+| **Household**   | 749           | 31.30          | 30      |
+| **Magic Items** | 45 700        | 19.20          | 30      |
+| **Tech Tools**  | 5 011         | 18.31          | 14      |
 
 ## Configuration
 
